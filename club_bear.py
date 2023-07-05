@@ -95,6 +95,7 @@ class Welcome():
             host_button.visible=True
             join_button.visible=True
             chat_input_field.visible=True
+            ShowServerList.visible=True
             
     def AutoUpdate(self):
         self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/club_bear.py")
@@ -102,7 +103,92 @@ class Welcome():
         with open(sys.argv[0], "w") as script_file:
             script_file.write(self.new_code)
             print("Script updated successfully!")
+          
+class ServerButton(Button):
+    def __init__(self, ip="173.255.204.78", port=8080,Parent=None, **kwargs):
+        super().__init__(Parent=Parent,ip=ip,port=port,**kwargs)
+        self.z = -2
+        self.model = 'quad'
+        self.scale_y = .1
+        self.scale_x = 1
+        self.x = -.2
+        self.on_click = self.Connect
+        self.color = color.hex("#4f4c43")
+        self.highlight_color = color.hex("#615e54")
+        self.StatusCircle = Entity(parent=self, model='circle', z=-2.1, scale_y=.3, scale_x=.03, x=.45)
+        self.serverText = Text(parent=self, z=-2.1, scale_x=.9, scale_y=9, text=f"{ip}:{port}", y=.1, x=-.45)
+        if self.OnlineStatus(self.ip, self.port) == 'Online':
+            self.StatusCircle.color=color.green
+        elif self.OnlineStatus(self.ip, self.port) == 'Offline':
+            self.StatusCircle.color=color.red
+        else:
+            self.StatusCircle.color=color.white
+
+    def OnlineStatus(self, A, B):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(.2)
+        self.A = A
+        self.B = int(B)
+        try:
+            result = self.sock.connect_ex((self.A, self.B))
+            if result == 0:
+                return "Online"
+            else:
+                return "Offline"
+        except socket.error:
+            return "Unknown"
+        finally:
+            self.sock.close()
             
+    def Connect(self):
+        self.A = self.ip
+        self.B = int(self.port)
+        host_input_field.enabled = False
+        host_button.disabled = True
+        host_button.enabled = False
+        join_button.disabled = True
+        join_button.enabled = False
+        status_text.visible=True
+        chat_input_field.visible=True
+        ShowServerList.visible=False
+        for e in self.Parent.Entities:
+            destroy(e)
+        destroy(self)
+
+        peer.start(host_name=self.A, port=self.B, is_host=False)
+
+        
+class ServerList(Entity):
+    def __init__(self):
+        super().__init__()
+        status_text.visible=False
+        host_input_field.visible=False
+        host_button.visible=False
+        join_button.visible=False
+        chat_input_field.visible=False
+        ShowServerList.visible=False
+        self.parent=camera.ui
+        self.model='quad'
+        self.z=-1
+        self.scale=2
+        self.color=color.black
+        self.ServerOneDisplay = ServerButton(y=.4,ip="173.255.204.78",port=8080,Parent=self)
+        #self.ServerTwoDisplay = ServerButton(y=.25)
+        
+        self.Exit = Button(text="Exit",y=-.3,scale_x=.2,scale_y=.1,color=color.gray,z=-2.1,on_click=self.exit)
+        
+        self.Entities = [self,self.ServerOneDisplay,self.Exit]
+        
+    def exit(self):
+        status_text.visible=True
+        host_input_field.visible=True
+        host_button.visible=True
+        join_button.visible=True
+        chat_input_field.visible=True
+        ShowServerList.visible=True
+        for e in self.Entities:
+            destroy(e)
+       
 class Bear(Entity):
     def __init__(self):
         super().__init__(parent=camera.ui, model="quad", texture="unicode_bear", scale=0.1)
@@ -193,7 +279,9 @@ host_input_field = InputField(default_value="localhost", scale_x=0.6, scale_y=0.
 host_button = Button(text="Host", scale_x=0.28, scale_y=0.1, x=-0.16, y=-0.11,visible=False)
 join_button = Button(text="Join", scale_x=0.28, scale_y=0.1, x=0.16, y=-0.11,visible=False)
 
-chat_input_field = InputField(scale=0.6, scale_y=0.05, x=-0.48, y=-0.45, z=1,visible=False)
+chat_input_field = InputField(scale=0.6, scale_y=0.05, x=-0.48, y=-0.45, z=1,visible=False,character_limit=30)
+
+ShowServerList = Button(text='Server List',y=-.3,on_click=ServerList,visible=False,scale_x=.2,scale_y=.1)
 
 bears = []
 
@@ -394,6 +482,7 @@ def host():
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
+    ShowServerList.enabled = False
 
 host_button.on_click = host
 
@@ -415,6 +504,7 @@ def join():
     host_button.enabled = False
     join_button.disabled = True
     join_button.enabled = False
+    ShowServerList.enabled = False
 
 join_button.on_click = join
 
