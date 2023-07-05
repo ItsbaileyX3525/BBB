@@ -1,5 +1,5 @@
 from ursina import *
-from ursina.networking import *
+from networking import *
 from collections import deque
 import requests
 
