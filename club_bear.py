@@ -78,7 +78,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.1.0"
+        self.version = "1.1.1"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -103,6 +103,8 @@ class Welcome():
         with open(sys.argv[0], "w") as script_file:
             script_file.write(self.new_code)
             print("Script updated successfully!")
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
           
 class ServerButton(Button):
     def __init__(self, ip="173.255.204.78", port=8080,Parent=None, **kwargs):
