@@ -74,16 +74,29 @@ def deserialize_bear_state(reader):
 
 class Welcome():
     def __init__(self):
-        super().__init__(parent=camera.ui,model='quad',color=color.white)
+        super().__init__()
+        self.parent=camera.ui
+        self.model='quad'
+        self.color=color.white
         self.version = "1.0.0"
-        self.url = "https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt"
-        self.response = requests.get(self.url)
-        if self.response.status_code == 200:
-            print(self.response.text)
-        else:
-            print("Failed to retrieve file. Status code:", self.response.status_code)
+        self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
+        if self.versionGet.status_code != 200:
+            print("Failed to retrieve file. Status code:", self.versionGet.status_code)
+            print_on_screen("Unable to retrieve version info, auto-exiting",duration=6)
+            Sequence(Wait(6),Func(application.quit)).start()
+        self.actualVersion = self.versionGet.text
+        if self.actualVersion != self.version:
+            print_on_screen("Club_bear is outdated, do you want to auto-update?",duration=99,position=(-.1,.1))
+            self.NoDontUpdate = Button(scale=.1,text='No',z=-1).on_click=application.quit
+            self.YesUpdate = Button(scale=.1,x=.11,text='Yes',z=-1).on_click=self.AutoUpdate
             
-
+    def AutoUpdate(self):
+        self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/club_bear.py")
+        self.new_code = self.response.text
+        with open(sys.argv[0], "w") as script_file:
+            script_file.write(self.new_code)
+            print("Script updated successfully!")
+            
 class Bear(Entity):
     def __init__(self):
         super().__init__(parent=camera.ui, model="quad", texture="unicode_bear", scale=0.1)
@@ -169,12 +182,12 @@ app = Ursina(borderless=False)
 uuid_counter = 0
 
 start_text = "Host or join a room."
-status_text = Text(text=start_text, origin=(0, 0), z=1, y=0.1)
-host_input_field = InputField(default_value="localhost", scale_x=0.6, scale_y=0.1)
-host_button = Button(text="Host", scale_x=0.28, scale_y=0.1, x=-0.16, y=-0.11)
-join_button = Button(text="Join", scale_x=0.28, scale_y=0.1, x=0.16, y=-0.11)
+status_text = Text(text=start_text, origin=(0, 0), z=1, y=0.1,visible=False)
+host_input_field = InputField(default_value="localhost", scale_x=0.6, scale_y=0.1,visible=False)
+host_button = Button(text="Host", scale_x=0.28, scale_y=0.1, x=-0.16, y=-0.11,visible=False)
+join_button = Button(text="Join", scale_x=0.28, scale_y=0.1, x=0.16, y=-0.11,visible=False)
 
-chat_input_field = InputField(scale=0.6, scale_y=0.05, x=-0.48, y=-0.45, z=1)
+chat_input_field = InputField(scale=0.6, scale_y=0.05, x=-0.48, y=-0.45, z=1,visible=False)
 
 bears = []
 
