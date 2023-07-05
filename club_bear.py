@@ -380,7 +380,12 @@ def host():
     my_bear_uuid = b.state.uuid
 
     h = host_input_field.text
-    port = 8080
+    try:
+        h = h.split(":")
+        port = int(h[1])
+    except IndexError:
+        port = 8080
+    h = h[0]
     
     if h == "":
         h = "localhost"
@@ -394,7 +399,12 @@ host_button.on_click = host
 
 def join():
     h = host_input_field.text
-    port = 8080
+    try:
+        h = h.split(":")
+        port = int(h[1])
+    except IndexError:
+        port = 8080
+    h = h[0]
     
     if h == "":
         h = "localhost"
