@@ -89,6 +89,12 @@ class Welcome():
             print_on_screen("Club_bear is outdated, do you want to auto-update?",duration=99,position=(-.1,.1))
             self.NoDontUpdate = Button(scale=.1,text='No',z=-1).on_click=application.quit
             self.YesUpdate = Button(scale=.1,x=.11,text='Yes',z=-1).on_click=self.AutoUpdate
+        else:
+            status_text.visible=True
+            host_input_field.visible=True
+            host_button.visible=True
+            join_button.visible=True
+            chat_input_field.visible=True
             
     def AutoUpdate(self):
         self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/club_bear.py")
