@@ -2,6 +2,7 @@ from ursina import *
 from networking import *
 from collections import deque
 import requests
+import os
 
 class InputState:
     def __init__(self, input_state=None):
@@ -78,7 +79,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.1.1"
+        self.version = "1.1.2"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -103,6 +104,15 @@ class Welcome():
         with open(sys.argv[0], "w") as script_file:
             script_file.write(self.new_code)
             print("Script updated successfully!")
+            
+            file_path = "version.txt"
+
+            if os.path.exists(file_path):
+                with open(file_path, 'w') as file:
+                    file.write(self.versionGet.text)
+            else:
+                pass
+            
             python = sys.executable
             os.execl(python, python, *sys.argv)
           
