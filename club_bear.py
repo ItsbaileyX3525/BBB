@@ -99,6 +99,7 @@ class Welcome():
             join_button.visible=True
             chat_input_field.visible=True
             ShowServerList.visible=True
+            title.visible=True
             
     def AutoUpdate(self):
         self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/club_bear.py")
@@ -165,6 +166,7 @@ class ServerButton(Button):
         status_text.visible=True
         chat_input_field.visible=True
         ShowServerList.visible=False
+        title.visible=False
         for e in self.Parent.Entities:
             destroy(e)
         destroy(self)
@@ -181,6 +183,7 @@ class ServerList(Entity):
         join_button.visible=False
         chat_input_field.visible=False
         ShowServerList.visible=False
+        title.visible=False
         self.parent=camera.ui
         self.model='quad'
         self.z=-1
@@ -200,6 +203,7 @@ class ServerList(Entity):
         join_button.visible=True
         chat_input_field.visible=True
         ShowServerList.visible=True
+        title.visible=True
         for e in self.Entities:
             destroy(e)
        
@@ -299,6 +303,8 @@ ShowServerList = Button(text='Server List',y=-.3,on_click=ServerList,visible=Fal
 
 bears = []
 
+title=Animation('BBB_client.gif',y=2)
+
 my_bear_uuid = None
 uuid_to_bear = dict()
 
@@ -325,6 +331,7 @@ peer.register_type(InputState, serialize_input_state, deserialize_input_state)
 peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 
 welcomeMenu=Welcome()
+
 
 @rpc(peer)
 def on_connect(connection, time_connected):
@@ -497,6 +504,7 @@ def host():
     host_button.enabled = False
     join_button.enabled = False
     ShowServerList.enabled = False
+    title.enabled=True
 
 host_button.on_click = host
 
@@ -519,6 +527,7 @@ def join():
     join_button.disabled = True
     join_button.enabled = False
     ShowServerList.enabled = False
+    title.enabled=False
 
 join_button.on_click = join
 
@@ -527,8 +536,7 @@ def on_chat_submit():
         return
 
     if profanity.contains_profanity(chat_input_field.text):
-        randomdict = ['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!']
-        chat_input_field.text = random.choice(randomdict)
+        chat_input_field.text = random.choice(['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!'])
 
     if not peer.is_running():
         return
