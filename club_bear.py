@@ -3,6 +3,8 @@ from networking import *
 from collections import deque
 import requests
 import os
+from profanity import profanity
+
 
 class InputState:
     def __init__(self, input_state=None):
@@ -79,7 +81,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.1.2"
+        self.version = "1.2.0"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -524,6 +526,10 @@ def on_chat_submit():
     if len(chat_input_field.text) == 0:
         return
 
+    if profanity.contains_profanity(chat_input_field.text):
+        randomdict = ['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!']
+        chat_input_field.text = random.choice(randomdict)
+
     if not peer.is_running():
         return
 
@@ -544,7 +550,7 @@ def tick(dt):
     global last_input_sequence_number_processed
 
     if time_factor < 1.0:
-        print("Host is lagging, slowing down local simulation.")
+        pass
 
     if not chat_input_field.active:
         input_state.up = bool(held_keys["w"])
