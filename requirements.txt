@@ -1,4 +1,4 @@
 https://github.com/pokepetter/ursina/archive/master.zip
-imageio
+imageio==2.70.0
 requests
 profanity
