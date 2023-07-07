@@ -81,7 +81,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.2.0"
+        self.version = "1.3.0"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -127,31 +127,30 @@ class ServerButton(Button):
         self.scale_y = .1
         self.scale_x = 1
         self.x = -.2
+        self.status = "unknown"
+        self.running = threading.Event()
+        self.running.set()
         self.on_click = self.Connect
         self.color = color.hex("#4f4c43")
         self.highlight_color = color.hex("#615e54")
         self.StatusCircle = Entity(parent=self, model='circle', z=-2.1, scale_y=.3, scale_x=.03, x=.45)
         self.serverText = Text(parent=self, z=-2.1, scale_x=.9, scale_y=9, text=f"{ip}:{port}", y=.1, x=-.45)
-        if self.OnlineStatus(self.ip, self.port) == 'Online':
-            self.StatusCircle.color=color.green
-        elif self.OnlineStatus(self.ip, self.port) == 'Offline':
-            self.StatusCircle.color=color.red
-        else:
-            self.StatusCircle.color=color.white
+        self.thread=threading.Thread(target=self.OnlineStatus, args=(self.ip, self.port))
+        self.thread.start()
 
     def OnlineStatus(self, A, B):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(.2)
+        self.sock.settimeout(.4)
         self.A = A
         self.B = int(B)
         try:
             result = self.sock.connect_ex((self.A, self.B))
             if result == 0:
-                return "Online"
+                self.status = "Online"
             else:
-                return "Offline"
+                self.status = "Offline"
         except socket.error:
-            return "Unknown"
+            self.status = "Unknown"
         finally:
             self.sock.close()
             
@@ -173,7 +172,13 @@ class ServerButton(Button):
 
         peer.start(host_name=self.A, port=self.B, is_host=False)
 
-        
+    def update(self):
+        if self.status == 'Online':
+            self.StatusCircle.color=color.green
+        elif self.status == 'Offline':
+            self.StatusCircle.color=color.red
+        else:
+            self.StatusCircle.color=color.white
 class ServerList(Entity):
     def __init__(self):
         super().__init__()
