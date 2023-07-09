@@ -4,7 +4,7 @@ from collections import deque
 import requests
 import os
 from profanity import profanity
-
+import json
 
 class InputState:
     def __init__(self, input_state=None):
@@ -106,7 +106,6 @@ class Welcome():
         self.new_code = self.response.text
         with open(sys.argv[0], "w") as script_file:
             script_file.write(self.new_code)
-            print("Script updated successfully!")
             
             file_path = "version.txt"
 
@@ -118,41 +117,80 @@ class Welcome():
             
             python = sys.executable
             os.execl(python, python, *sys.argv)
-          
+
+
 class ServerButton(Button):
-    def __init__(self, ip="173.255.204.78", port=8080,Parent=None, **kwargs):
-        super().__init__(Parent=Parent,ip=ip,port=port,**kwargs)
-        self.z = -2
+    def __init__(self, ip="173.255.204.78", port=8080,Parent=None,ID=None, **kwargs):
+        super().__init__(Parent=Parent,ip=ip,port=port,ID=ID,**kwargs)
+        self.z = -2.05
         self.model = 'quad'
         self.scale_y = .1
         self.scale_x = 1
         self.x = -.2
         self.status = "unknown"
         self.running = threading.Event()
-        self.running.set()
+        
         self.on_click = self.Connect
         self.color = color.hex("#4f4c43")
         self.highlight_color = color.hex("#615e54")
         self.StatusCircle = Entity(parent=self, model='circle', z=-2.1, scale_y=.3, scale_x=.03, x=.45)
         self.serverText = Text(parent=self, z=-2.1, scale_x=.9, scale_y=9, text=f"{ip}:{port}", y=.1, x=-.45)
-        self.thread=threading.Thread(target=self.OnlineStatus, args=(self.ip, self.port))
+        self.removeSelf = Button(parent=self,icon='bin.png',color=color.red,highlight_color=color.red,scale_x=.05,scale_y=.5,pressed_color=color.red,z=-2.2,x=.6,on_click = self.removeButton)
+        self.thread=threading.Thread(target=self.OnlineStatus, args=(self.ip, self.port,self.running))
         self.thread.start()
+        
+        
+    def OnlineStatus(self, A, B, stop_event):
+        while not stop_event.is_set():
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(.4)
+            self.A = A
+            self.B = int(B)
+            try:
+                result = self.sock.connect_ex((self.A, self.B))
+                if result == 0:
+                    self.status = "Online"
+                    self.running.set()
+                    self.thread.join()
+                else:
+                    self.status = "Offline"
+                    self.running.set()
+                    self.thread.join()
+            except socket.error:
+                self.status = "Unknown"
+                self.running.set()
+                self.thread.join()
+            except RuntimeError:
+                sys.exit()
+            finally:
+                self.sock.close()
+                
+    def removeButton(self):
+        with open("Settings.json", "r") as file:
+            self.data = json.load(file)
+        if self.ID == 1:
+            self.Parent.ServerButtons['display1'] = None
+            self.data["Server1IP"] = "Nothing";self.data["Server1Port"] = "Nothing"
+        if self.ID == 2:
+            self.Parent.ServerButtons['display2'] = None
+            self.data["Server2IP"] = "Nothing";self.data["Server2Port"] = "Nothing"
+        if self.ID == 3:
+            self.Parent.ServerButtons['display3'] = None
+            self.data["Server3IP"] = "Nothing";self.data["Server3Port"] = "Nothing"
+        if self.ID == 4:
+            self.Parent.ServerButtons['display4'] = None
+            self.data["Server4IP"] = "Nothing";self.data["Server4Port"] = "Nothing"
+        if self.ID == 5:
+            self.Parent.ServerButtons['display5'] = None
+            self.data["Server5IP"] = "Nothing";self.data["Server5Port"] = "Nothing"
+        if self.ID == 6:
+            self.Parent.ServerButtons['display6'] = None
+            self.data["Server6IP"] = "Nothing";self.data["Server6Port"] = "Nothing"
 
-    def OnlineStatus(self, A, B):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(.4)
-        self.A = A
-        self.B = int(B)
-        try:
-            result = self.sock.connect_ex((self.A, self.B))
-            if result == 0:
-                self.status = "Online"
-            else:
-                self.status = "Offline"
-        except socket.error:
-            self.status = "Unknown"
-        finally:
-            self.sock.close()
+        with open("Settings.json", 'w') as file:
+            json.dump(self.data, file, indent=4)
+        destroy(self)
+        
             
     def Connect(self):
         self.A = self.ip
@@ -168,9 +206,13 @@ class ServerButton(Button):
         title.visible=False
         for e in self.Parent.Entities:
             destroy(e)
-        destroy(self)
+        for e in scene.entities:
+            if e in self.Parent.ServerButtons:
+                destroy(e)
+       
 
         peer.start(host_name=self.A, port=self.B, is_host=False)
+        destroy(self)
 
     def update(self):
         if self.status == 'Online':
@@ -179,6 +221,7 @@ class ServerButton(Button):
             self.StatusCircle.color=color.red
         else:
             self.StatusCircle.color=color.white
+
 class ServerList(Entity):
     def __init__(self):
         super().__init__()
@@ -194,13 +237,46 @@ class ServerList(Entity):
         self.z=-1
         self.scale=2
         self.color=color.black
-        self.ServerOneDisplay = ServerButton(y=.4,ip="173.255.204.78",port=8080,Parent=self)
-        #self.ServerTwoDisplay = ServerButton(y=.25)
         
-        self.Exit = Button(text="Exit",y=-.3,scale_x=.2,scale_y=.1,color=color.gray,z=-2.1,on_click=self.exit)
+
+        self.Exit = Button(text="Exit",x=-.1,y=-.3,scale_x=.2,scale_y=.1,color=color.gray,z=-2.1,on_click=self.exit)
+        self.AddSever = Button(text='Add sever',y=-.3,x=.15,scale_x=.2,scale_y=.1,z=-2.1,color=color.gray,on_click=self.addServer)
+        self.ServerInput = InputField(character_limit=24,default_value="192.168.1.1:8080",z=-2.1, y=-.45,x=0,scale_x=0.5, scale_y=0.1,color=color.gray,enabled=False)
+        self.ServerInput.highlight_color=color.light_gray
+        self.confirmCustomServer = Button(text="Confirm",enabled=False,z=-2.1,y=-.45,x=.4,scale_x=.2,scale_y=.1,color=color.gray)
         
-        self.Entities = [self,self.ServerOneDisplay,self.Exit]
         
+        with open("Settings.json") as file:
+            self.data = json.load(file)
+            
+        self.ServerButtons = {'display1': None, 'display2': None, 'display3': None, 'display4': None, 'display5': None, 'display6': None}
+        
+        if 'Server1IP' in self.data:
+            if self.data['Server1IP'] !="Nothing":
+                self.ServerButtons['display1'] = ServerButton(y=.45,Parent=self,ip=self.data['Server1IP'],port=self.data['Server1Port'],ID=1)
+            
+        if 'Server2IP' in self.data:
+            if self.data['Server2IP'] !="Nothing":
+                self.ServerButtons['display2'] = ServerButton(y=.35,Parent=self,ip=self.data['Server2IP'],port=self.data['Server2Port'],ID=2)
+            
+        if 'Server3IP' in self.data:
+            if self.data['Server3IP'] !="Nothing":
+                self.ServerButtons['display3'] = ServerButton(y=.25,Parent=self,ip=self.data['Server3IP'],port=self.data['Server3Port'],ID=3)
+            
+        if 'Server4IP' in self.data:
+            if self.data['Server4IP'] !="Nothing":
+                self.ServerButtons['display4'] = ServerButton(y=.15,Parent=self,ip=self.data['Server4IP'],port=self.data['Server4Port'],ID=4)
+            
+        if 'Server5IP' in self.data:
+            if self.data['Server5IP'] !="Nothing":
+                self.ServerButtons['display5'] = ServerButton(y=.05,Parent=self,ip=self.data['Server5IP'],port=self.data['Server5Port'],ID=5)
+            
+        if 'Server6IP' in self.data:
+            if self.data['Server6IP'] !="Nothing":
+                self.ServerButtons['display6'] = ServerButton(y=-.05,Parent=self,ip=self.data['Server6IP'],port=self.data['Server6Port'],ID=6)
+            
+        
+        self.Entities = [self,self.Exit,self.AddSever,self.ServerInput,self.confirmCustomServer]
     def exit(self):
         status_text.visible=True
         host_input_field.visible=True
@@ -211,7 +287,52 @@ class ServerList(Entity):
         title.visible=True
         for e in self.Entities:
             destroy(e)
-       
+    
+    def addServer(self):
+        self.ServerInput.enabled=True
+        self.confirmCustomServer.enabled=True
+    
+    def confirmSever(self,args):
+        try:
+            args = args.split(":")
+            port = args[1]
+        except IndexError:
+            port = 8080
+        ip = args[0]
+        if not str(ip).startswith(tuple(str(_) for _ in range(10))):
+            print_on_screen("Domains not supported yet",position=(0,0,-2.4),duration=2)
+            return
+        else:
+            pass
+        with open("Settings.json") as file:
+            data = json.load(file)
+        
+        if self.ServerButtons['display1'] == None:
+            self.ServerButtons['display1'] = ServerButton(y=.45,Parent=self,ip=ip,port=port,ID=1)
+            self.data["Server1IP"] = ip;self.data["Server1Port"] = port
+        elif self.ServerButtons['display2'] == None:
+            self.ServerButtons['display2'] = ServerButton(y=.35,Parent=self,ip=ip,port=port,ID=2)
+            self.data["Server2IP"] = ip;self.data["Server2Port"] = port
+        elif self.ServerButtons['display3'] == None:
+            self.ServerButtons['display3'] = ServerButton(y=.25,Parent=self,ip=ip,port=port,ID=3)
+            self.data["Server3IP"] = ip;self.data["Server3Port"] = port
+        elif self.ServerButtons['display4'] == None:
+            self.ServerButtons['display4'] = ServerButton(y=.15,Parent=self,ip=ip,port=port,ID=4)
+            self.data["Server4IP"] = ip;self.data["Server4Port"] = port
+        elif self.ServerButtons['display5'] == None:
+            self.ServerButtons['display5'] = ServerButton(y=.05,Parent=self,ip=ip,port=port,ID=5)
+            self.data["Server5IP"] = ip;self.data["Server5Port"] = port
+        elif self.ServerButtons['display6'] == None:
+            self.ServerButtons['display6'] = ServerButton(y=-.05,Parent=self,ip=ip,port=port,ID=6)
+            self.data["Server6IP"] = ip;self.data["Server6Port"] = port
+    
+        with open("Settings.json", 'w') as file:
+            json.dump(data, file, indent=4)
+            
+    def update(self):
+        self.confirmCustomServer.on_click=Func(self.confirmSever, args=self.ServerInput.text)
+        
+            
 class Bear(Entity):
     def __init__(self):
         super().__init__(parent=camera.ui, model="quad", texture="unicode_bear", scale=0.1)
