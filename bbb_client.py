@@ -734,17 +734,17 @@ def on_name_submit(passedName):
     if len(passedName) == 0:
         return "Nameless"
 
-    with open(controlsPath, 'r') as file:
-        data = json.load(file)
-        
+    with open(controlsPath, 'r') as files:
+        data = json.load(files)
+
     data['Name'] = passedName
-    
-    with open(controlsPath, "w") as file:
-        json.dump(data, file, indent=4)
+
+    with open(controlsPath, "w") as files:
+        json.dump(data, files, indent=4)
 
     if not peer.is_running():
         return
-    
+
     if my_bear_uuid is not None:
         for conn in peer.get_connections():
             peer.namesettar(conn, my_bear_uuid, passedName)
