@@ -1,11 +1,21 @@
-from ursina import *
-from networking import *
-from collections import deque
-import requests
-import os
-from profanity import profanity
-import json
+try:
+    from ursina import *
+    from networking import *
+    from collections import deque
+    import requests
+    import os
+    from profanity import profanity
+    import json
+    from pathlib import Path
+    import glob
+except:
+    print_warning("Failed to import modules probably due to the fact that you dont have them...\n run: pip install -r requirements.txt")
+main_directory = Path(__file__).resolve().parent
 
+SettingsFile = str(main_directory / 'Settings.json')
+SettingsFile = glob.glob(SettingsFile)
+if SettingsFile:
+    controlsPath = SettingsFile[0]
 class InputState:
     def __init__(self, input_state=None):
         if input_state is not None:
@@ -98,6 +108,7 @@ class Welcome():
             host_button.visible=True
             join_button.visible=True
             chat_input_field.visible=True
+            name_input_field.visible=True
             ShowServerList.visible=True
             title.visible=True
             
@@ -167,7 +178,7 @@ class ServerButton(Button):
                 self.sock.close()
                 
     def removeButton(self):
-        with open("Settings.json", "r") as file:
+        with open(controlsPath, "r") as file:
             self.data = json.load(file)
         if self.ID == 1:
             self.Parent.ServerButtons['display1'] = None
@@ -188,7 +199,7 @@ class ServerButton(Button):
             self.Parent.ServerButtons['display6'] = None
             self.data["Server6IP"] = "Nothing";self.data["Server6Port"] = "Nothing"
 
-        with open("Settings.json", 'w') as file:
+        with open(controlsPath, 'w') as file:
             json.dump(self.data, file, indent=4)
         destroy(self)
         
@@ -206,6 +217,7 @@ class ServerButton(Button):
         join_button.enabled = False
         status_text.visible=True
         chat_input_field.visible=True
+        name_input_field.visible=True
         ShowServerList.visible=False
         title.visible=False
         for e in self.Parent.Entities:
@@ -233,6 +245,7 @@ class ServerList(Entity):
         host_button.visible=False
         join_button.visible=False
         chat_input_field.visible=False
+        name_input_field.visible=False
         ShowServerList.visible=False
         title.visible=False
         self.parent=camera.ui
@@ -248,7 +261,7 @@ class ServerList(Entity):
         self.confirmCustomServer = Button(text="Confirm",enabled=False,z=-2.1,y=-.45,x=.4,scale_x=.2,scale_y=.1,color=color.gray)
         
         
-        with open("Settings.json") as file:
+        with open(controlsPath) as file:
             self.data = json.load(file)
             
         self.ServerButtons = {'display1': None, 'display2': None, 'display3': None, 'display4': None, 'display5': None, 'display6': None}
@@ -285,6 +298,7 @@ class ServerList(Entity):
         host_button.visible=True
         join_button.visible=True
         chat_input_field.visible=True
+        name_input_field.visible=True
         ShowServerList.visible=True
         title.visible=True
         for e in self.Entities:
@@ -308,7 +322,7 @@ class ServerList(Entity):
             return
         else:
             pass
-        with open("Settings.json") as file:
+        with open(controlsPath) as file:
             self.data = json.load(file)
         
         if self.ServerButtons['display1'] == None:
@@ -358,6 +372,8 @@ class Bear(Entity):
         self.talk_timer = 0.0
         self.speech_text = Text(visible=False, y=self.y+0.05, origin=(0, 0))
         self.speech_audio = Audio("sine", autoplay=False, loop=True, loops=20)
+        
+        self.bearnames = Text(visible=True,x=0, y=self.y-0.05,origin=(0,0))
 
     def update(self):
         if self.lerping:
@@ -387,6 +403,9 @@ class Bear(Entity):
                 self.talking = False
         else:
             self.speech_text.visible = False
+            
+        self.bearnames.x = self.x
+        self.bearnames.y = self.y- 0.05
 
     def tick(self, dt):
         self.state.x += float(int(self.state.input_state.right) - int(self.state.input_state.left)) * self.speed * dt
@@ -415,6 +434,9 @@ class Bear(Entity):
         self.talk_timer = 0.0
         self.speech_text.text = msg
         self.speech_audio.play()
+        
+    def set_name(self,name):
+        self.bearnames.text = name
 
 
 app = Ursina(borderless=False)
@@ -428,6 +450,14 @@ host_button = Button(text="Host", scale_x=0.28, scale_y=0.1, x=-0.16, y=-0.11,vi
 join_button = Button(text="Join", scale_x=0.28, scale_y=0.1, x=0.16, y=-0.11,visible=False)
 
 chat_input_field = InputField(scale=0.6, scale_y=0.05, x=-0.48, y=-0.45, z=1,visible=False,character_limit=30)
+
+with open(controlsPath, "r") as file:
+    data = json.load(file)
+    
+if 'Name' in data:
+    name_input_field = InputField(default_value=data['Name'],scale=0.6, scale_y=0.05, x=-0.45, y=-0.45, z=1,visible=False,character_limit=12)
+else:
+    name_input_field = InputField(default_value="Enter name...",scale=0.6, scale_y=0.05, x=-0.45, y=-0.45, z=1,visible=False,character_limit=12)
 
 ShowServerList = Button(text='Server List',y=-.3,on_click=ServerList,visible=False,scale_x=.2,scale_y=.1)
 
@@ -486,6 +516,7 @@ def on_disconnect(connection, time_disconnected):
         b = connection_to_bear.get(connection)
         if b is not None:
             destroy(b)
+            destroy(b.bearnames)
             bears.remove(b)
             del uuid_to_bear[b.state.uuid]
             del connection_to_bear[connection]
@@ -607,6 +638,22 @@ def chat(connection, time_received, uuid: int, msg: str):
             return
         bear.set_speech(msg, speech_duration)
 
+@rpc(peer)
+def namesettar(connection, time_received, uuid: int, name: str):
+    if connection.rpc_peer.is_hosting():
+        bear=connection_to_bear.get(connection)
+        if bear is None:
+            return
+        if bear.state.uuid == uuid:
+            for conn in connection.rpc_peer.get_connections():
+                connection.rpc_peer.namesettar(conn,uuid,name)
+            bear.set_name(name)
+    else:
+        bear = uuid_to_bear.get(uuid)
+        if bear is None:
+            return
+        bear.set_name(name)
+
 def host():
     global uuid_counter, my_bear_uuid
 
@@ -632,8 +679,9 @@ def host():
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
+    title.enabled=False
+    name_input_field.enabled = False
     ShowServerList.enabled = False
-    title.enabled=True
 
 host_button.on_click = host
 
@@ -651,10 +699,9 @@ def join():
 
     peer.start(h, port, is_host=False)
     host_input_field.enabled = False
-    host_button.disabled = True
     host_button.enabled = False
-    join_button.disabled = True
     join_button.enabled = False
+    name_input_field.enabled = False
     ShowServerList.enabled = False
     title.enabled=False
 
@@ -682,6 +729,32 @@ def on_chat_submit():
 
     chat_input_field.text = ""
     chat_input_field.active = False
+    
+def on_name_submit(passedName):
+    if len(passedName) == 0:
+        return "Nameless"
+
+    with open(controlsPath, 'r') as file:
+        data = json.load(file)
+        
+    data['Name'] = passedName
+    
+    with open(controlsPath, "w") as file:
+        json.dump(data, file, indent=4)
+
+    if not peer.is_running():
+        return
+    
+    if my_bear_uuid is not None:
+        for conn in peer.get_connections():
+            peer.namesettar(conn, my_bear_uuid, passedName)
+
+    if peer.is_hosting():
+        if my_bear_uuid is not None:
+            bear = uuid_to_bear.get(my_bear_uuid)
+            if bear is not None:
+                bear.set_name(passedName)
+    
 
 def tick(dt):
     global last_input_sequence_number_processed
@@ -748,9 +821,15 @@ def update():
     if peer.is_hosting():
         status_text.text = "Hosting.\nWASD to move."
         status_text.y = -0.45
+        if profanity.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
+            name_input_field.text = 'No name'
+        on_name_submit(name_input_field.text)
     else:
         status_text.text = "Connected to host.\nWASD to move."
         status_text.y = -0.45
+        if profanity.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
+            name_input_field.text = 'No name'
+        on_name_submit(name_input_field.text)
 
     tick_timer += time.dt * time_factor
     while tick_timer >= tick_rate:
