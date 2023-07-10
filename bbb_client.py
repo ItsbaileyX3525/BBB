@@ -91,7 +91,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.4.6"
+        self.version = "1.5.0"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -410,14 +410,14 @@ class Bear(Entity):
     def tick(self, dt):
         self.state.x += float(int(self.state.input_state.right) - int(self.state.input_state.left)) * self.speed * dt
         self.state.y += float(int(self.state.input_state.up) - int(self.state.input_state.down)) * self.speed * dt
-        if self.state.x >= 0.45:
-            self.state.x = 0.45
-        elif self.state.x <= -0.45:
-            self.state.x = -0.45
-        if self.state.y >= 0.45:
-            self.state.y = 0.45
-        elif self.state.y <= -0.45:
-            self.state.y = -0.45
+        if self.state.x >= 0.78:
+            self.state.x = 0.78
+        elif self.state.x <= -0.78:
+            self.state.x = -0.78
+        if self.state.y >= 0.44:
+            self.state.y = 0.44
+        elif self.state.y <= -0.36:
+            self.state.y = -0.36
 
     def interpolate(self, start_state, end_state, duration):
         if self.lerping:
