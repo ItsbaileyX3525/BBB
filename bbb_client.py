@@ -9,7 +9,12 @@ try:
     from pathlib import Path
     import glob
 except:
-    print_warning("Failed to import modules probably due to the fact that you dont have them...\n run: pip install -r requirements.txt")
+    import subprocess
+    command = 'pip install -r requirements.txt'
+    subprocess.call(command, shell=True)
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
 main_directory = Path(__file__).resolve().parent
 
 SettingsFile = str(main_directory / 'Settings.json')
