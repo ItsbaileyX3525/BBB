@@ -118,7 +118,7 @@ class Welcome():
             title.visible=True
             
     def AutoUpdate(self):
-        self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/club_bear.py")
+        self.response = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/bbb_client.py")
         self.new_code = self.response.text
         with open(sys.argv[0], "w") as script_file:
             script_file.write(self.new_code)
@@ -130,7 +130,6 @@ class Welcome():
                     file.write(self.versionGet.text)
             else:
                 pass
-            
             python = sys.executable
             os.execl(python, python, *sys.argv)
 
