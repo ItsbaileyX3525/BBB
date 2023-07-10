@@ -96,7 +96,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.5.0"
+        self.version = "1.5.1"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -864,5 +864,10 @@ def input(key):
     elif key == "escape up" and chat_input_field.active:
         chat_input_field.text = ""
         chat_input_field.active = False
+
+input_handler.rebind('up arrow', 'w')
+input_handler.rebind('left arrow', 'a')
+input_handler.rebind('down arrow', 's')
+input_handler.rebind('right arrow', 'd')
 
 app.run() 
