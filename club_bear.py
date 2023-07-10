@@ -81,7 +81,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.4.5"
+        self.version = "1.4.6"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -194,7 +194,7 @@ class ServerButton(Button):
         
             
     def Connect(self):
-        if self.status != "online":
+        if self.status != "Online":
             print_on_screen("Server offline",position=(.5,0.1,-2.6))
             return
         self.A = self.ip
