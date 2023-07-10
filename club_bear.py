@@ -81,7 +81,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.4.0"
+        self.version = "1.4.5"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -118,17 +118,18 @@ class Welcome():
             python = sys.executable
             os.execl(python, python, *sys.argv)
 
-
+serverinstances = []
 class ServerButton(Button):
     def __init__(self, ip="173.255.204.78", port=8080,Parent=None,ID=None, **kwargs):
         super().__init__(Parent=Parent,ip=ip,port=port,ID=ID,**kwargs)
         self.z = -2.05
         self.model = 'quad'
         self.scale_y = .1
-        self.scale_x = 1
+        self.scale_x = 1 
         self.x = -.2
         self.status = "unknown"
         self.running = threading.Event()
+        serverinstances.append(self)
         
         self.on_click = self.Connect
         self.color = color.hex("#4f4c43")
@@ -193,6 +194,9 @@ class ServerButton(Button):
         
             
     def Connect(self):
+        if self.status != "online":
+            print_on_screen("Server offline",position=(.5,0.1,-2.6))
+            return
         self.A = self.ip
         self.B = int(self.port)
         host_input_field.enabled = False
@@ -206,9 +210,8 @@ class ServerButton(Button):
         title.visible=False
         for e in self.Parent.Entities:
             destroy(e)
-        for e in scene.entities:
-            if e in self.Parent.ServerButtons:
-                destroy(e)
+        for e in serverinstances:
+            destroy(e)
        
 
         peer.start(host_name=self.A, port=self.B, is_host=False)
@@ -238,7 +241,6 @@ class ServerList(Entity):
         self.scale=2
         self.color=color.black
         
-
         self.Exit = Button(text="Exit",x=-.1,y=-.3,scale_x=.2,scale_y=.1,color=color.gray,z=-2.1,on_click=self.exit)
         self.AddSever = Button(text='Add sever',y=-.3,x=.15,scale_x=.2,scale_y=.1,z=-2.1,color=color.gray,on_click=self.addServer)
         self.ServerInput = InputField(character_limit=24,default_value="192.168.1.1:8080",z=-2.1, y=-.45,x=0,scale_x=0.5, scale_y=0.1,color=color.gray,enabled=False)
@@ -254,7 +256,7 @@ class ServerList(Entity):
         if 'Server1IP' in self.data:
             if self.data['Server1IP'] !="Nothing":
                 self.ServerButtons['display1'] = ServerButton(y=.45,Parent=self,ip=self.data['Server1IP'],port=self.data['Server1Port'],ID=1)
-            
+                
         if 'Server2IP' in self.data:
             if self.data['Server2IP'] !="Nothing":
                 self.ServerButtons['display2'] = ServerButton(y=.35,Parent=self,ip=self.data['Server2IP'],port=self.data['Server2Port'],ID=2)
@@ -287,6 +289,8 @@ class ServerList(Entity):
         title.visible=True
         for e in self.Entities:
             destroy(e)
+        for e in serverinstances:
+            destroy(e)
     
     def addServer(self):
         self.ServerInput.enabled=True
@@ -305,7 +309,7 @@ class ServerList(Entity):
         else:
             pass
         with open("Settings.json") as file:
-            data = json.load(file)
+            self.data = json.load(file)
         
         if self.ServerButtons['display1'] == None:
             self.ServerButtons['display1'] = ServerButton(y=.45,Parent=self,ip=ip,port=port,ID=1)
@@ -327,7 +331,7 @@ class ServerList(Entity):
             self.data["Server6IP"] = ip;self.data["Server6Port"] = port
     
         with open("Settings.json", 'w') as file:
-            json.dump(data, file, indent=4)
+            json.dump(self.data, file, indent=4)
             
     def update(self):
         self.confirmCustomServer.on_click=Func(self.confirmSever, args=self.ServerInput.text)
@@ -457,7 +461,6 @@ peer.register_type(InputState, serialize_input_state, deserialize_input_state)
 peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 
 welcomeMenu=Welcome()
-
 
 @rpc(peer)
 def on_connect(connection, time_connected):
