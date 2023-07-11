@@ -31,8 +31,7 @@ if not os.path.exists(f"{main_directory}\\Settings.json"):
     "Server5IP": "Nothing",
     "Server5Port": "Nothing",
     "Server6IP": "Nothing",
-    "Server6Port": "Nothing"
-}""")
+    "Server6Port": "Nothing"}""")
 else:
     pass
 SettingsFile = str(main_directory / 'Settings.json')
