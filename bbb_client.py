@@ -128,7 +128,7 @@ class Welcome():
             join_button.visible=True
             chat_input_field.visible=True
             name_input_field.visible=True
-            ShowServerList.visible=True
+            ShowServerList.enabled=True
             title.visible=True
             
     def AutoUpdate(self):
@@ -229,14 +229,14 @@ class ServerButton(Button):
         self.A = self.ip
         self.B = int(self.port)
         host_input_field.enabled = False
-        host_button.disabled = True
         host_button.enabled = False
-        join_button.disabled = True
         join_button.enabled = False
         status_text.visible=True
         chat_input_field.visible=True
-        name_input_field.visible=False
-        ShowServerList.visible=False
+        name_input_field.enabled=True
+        name_input_field.visible=True
+        name_input_field.x = .5
+        ShowServerList.enabled=False
         title.visible=False
         for e in self.Parent.Entities:
             destroy(e)
@@ -264,7 +264,7 @@ class ServerList(Entity):
         join_button.visible=False
         chat_input_field.visible=False
         name_input_field.visible=False
-        ShowServerList.visible=False
+        ShowServerList.enabled=False
         title.visible=False
         self.parent=camera.ui
         self.model='quad'
@@ -317,7 +317,7 @@ class ServerList(Entity):
         join_button.visible=True
         chat_input_field.visible=True
         name_input_field.visible=True
-        ShowServerList.visible=True
+        ShowServerList.enabled=True
         title.visible=True
         for e in self.Entities:
             destroy(e)
@@ -477,7 +477,7 @@ if 'Name' in data:
 else:
     name_input_field = InputField(default_value="Enter name...",scale=0.6, scale_y=0.05, x=-0.45, y=-0.45, z=1,visible=False,character_limit=12)
 
-ShowServerList = Button(text='Server List',y=-.3,on_click=ServerList,visible=False,scale_x=.2,scale_y=.1)
+ShowServerList = Button(text='Server List',y=-.3,on_click=ServerList,enabled=True,scale_x=.2,scale_y=.1)
 
 bears = []
 
@@ -698,7 +698,6 @@ def host():
     host_button.enabled = False
     join_button.enabled = False
     title.enabled=False
-    name_input_field.enabled = False
     ShowServerList.enabled = False
 
 host_button.on_click = host
@@ -719,7 +718,6 @@ def join():
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
-    name_input_field.enabled = False
     ShowServerList.enabled = False
     title.enabled=False
 
