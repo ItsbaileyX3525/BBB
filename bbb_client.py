@@ -26,9 +26,9 @@ def replace_emoji(string):
     emoji_dict = {
         ":skull:": "<image:emoji/1F480.png>",
         ":rofl:": "<image:emoji/1F923.png>",
-        ":grin:": "<image:emoji/1F601.png",
+        ":grin:": "<image:emoji/1F601.png">,
         ":grinning:": "<image:emoji/1F600.png>",
-        ":smiley:": "<image:emoji/1F603.png",
+        ":smiley:": "<image:emoji/1F603.png>",
         ":joy:": "<image:emoji/1F602.png>"}
 
     for emoji, replacement in emoji_dict.items():
@@ -513,7 +513,6 @@ welcomeMenu=Welcome()
 @rpc(peer)
 def on_connect(connection, time_connected):
     global uuid_counter
-
     if peer.is_hosting():
         b = Bear()
         b.state.uuid = uuid_counter
@@ -548,7 +547,7 @@ def on_disconnect(connection, time_disconnected):
             del uuid_to_bear[bear.state.uuid]
         bears.clear()
         my_bear_uuid = None
-
+        destroy(bear.bearnames)
 
 @rpc(peer)
 def set_bear_uuid(connection, time_received, uuid: int):
@@ -815,8 +814,6 @@ def tick(dt):
                     bear.state.input_state.right = False
                 bear.tick(dt)
 
-test=Button(text='hi',scale=.1,x=.2,enabled=False)
-test.on_click = peer.stop
 def update():
     global update_timer, tick_timer
 
