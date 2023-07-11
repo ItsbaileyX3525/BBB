@@ -110,7 +110,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.5.1"
+        self.version = "1.5.2"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -235,7 +235,7 @@ class ServerButton(Button):
         join_button.enabled = False
         status_text.visible=True
         chat_input_field.visible=True
-        name_input_field.visible=True
+        name_input_field.visible=False
         ShowServerList.visible=False
         title.visible=False
         for e in self.Parent.Entities:

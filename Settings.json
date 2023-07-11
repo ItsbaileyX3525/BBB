@@ -1,5 +1,5 @@
 {
-    "Server1IP": "173.255.204.78",
+    "Server1IP": "178.79.171.190",
     "Server1Port": "8080",
     "Server2IP": "Nothing",
     "Server2Port": "Nothing",
@@ -10,5 +10,5 @@
     "Server5IP": "Nothing",
     "Server5Port": "Nothing",
     "Server6IP": "Nothing",
-    "Server6Port": "Nothing"
+    "Server6Port": "Nothing",
 }
