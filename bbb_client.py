@@ -357,11 +357,6 @@ class ServerList(Entity):
         except IndexError:
             port = 8080
         ip = args[0]
-        if not str(ip).startswith(tuple(str(_) for _ in range(10))):
-            print_on_screen("Domains not supported yet",position=(0,0,-2.4),duration=2)
-            return
-        else:
-            pass
         with open(controlsPath) as file:
             self.data = json.load(file)
         
