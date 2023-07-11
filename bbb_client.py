@@ -19,7 +19,7 @@ except:
 if not os.path.exists(f"{main_directory}\\Settings.json"):
     with open(f"{main_directory}\\Settings.json", 'w') as file:
         file.write("""{
-    "Server1IP": "178.79.171.190",
+    "Server1IP": "bbbclient.ddns.net",
     "Server1Port": "8080",
     "Server2IP": "Nothing",
     "Server2Port": "Nothing",
@@ -734,7 +734,7 @@ def host():
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
-    name_input_field.x=.4
+    name_input_field.x=.5
     title.enabled=False
     ShowServerList.enabled = False
 
@@ -757,7 +757,7 @@ def join():
     host_button.enabled = False
     join_button.enabled = False
     ShowServerList.enabled = False
-    name_input_field.x=.4
+    name_input_field.x=.5
     title.enabled=False
 
 join_button.on_click = join
