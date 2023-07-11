@@ -22,6 +22,28 @@ SettingsFile = glob.glob(SettingsFile)
 if SettingsFile:
     controlsPath = SettingsFile[0]
 
+class CheckBox(Button):
+    def __init__(self, start_state=False, **kwargs):
+        super().__init__(start_state=start_state, state=start_state, scale=Text.size, model=Quad(radius=.25))
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+    def on_click(self):
+        self.state = not self.state
+
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
+        print(value)
+        self.text = ' x'[int(value)]
+
 def replace_emoji(string):
     emoji_dict = {
         ":skull:": "<image:emoji/1F480.png>",
@@ -447,6 +469,9 @@ class Bear(Entity):
         self.new_state = end_state.copy()
 
     def set_speech(self, msg, duration):
+        if ProfanityFilter.state:
+            if profanity.contains_profanity(msg):
+                msg = random.choice(['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!'])
         self.talking = True
         self.talk_time = duration
         self.talk_timer = 0.0
@@ -509,6 +534,8 @@ peer.register_type(InputState, serialize_input_state, deserialize_input_state)
 peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 
 welcomeMenu=Welcome()
+
+ProfanityFilter=CheckBox(start_value=False)
 
 @rpc(peer)
 def on_connect(connection, time_connected):
@@ -696,6 +723,7 @@ def host():
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
+    name_input_field.x=.4
     title.enabled=False
     ShowServerList.enabled = False
 
@@ -718,6 +746,7 @@ def join():
     host_button.enabled = False
     join_button.enabled = False
     ShowServerList.enabled = False
+    name_input_field.x=.4
     title.enabled=False
 
 join_button.on_click = join
@@ -725,10 +754,6 @@ join_button.on_click = join
 def on_chat_submit():
     if len(chat_input_field.text) == 0:
         return
-
-
-    if profanity.contains_profanity(chat_input_field.text):
-        chat_input_field.text = random.choice(['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!'])
 
     chat_input_field.text = replace_emoji(chat_input_field.text)
     if not peer.is_running():
