@@ -41,7 +41,7 @@ class CheckBox(Button):
     @state.setter
     def state(self, value):
         self._state = value
-        print(value)
+        #print(value)
         self.text = ' x'[int(value)]
 
 def replace_emoji(string):
@@ -535,7 +535,8 @@ peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 
 welcomeMenu=Welcome()
 
-ProfanityFilter=CheckBox(start_value=False)
+ProfanityFilterText=Text(text='Profanity Filter:',position=(-.85,.465))
+ProfanityFilter=CheckBox(start_value=False, position=(-.65,.45))
 
 @rpc(peer)
 def on_connect(connection, time_connected):
