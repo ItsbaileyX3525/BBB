@@ -21,6 +21,20 @@ SettingsFile = str(main_directory / 'Settings.json')
 SettingsFile = glob.glob(SettingsFile)
 if SettingsFile:
     controlsPath = SettingsFile[0]
+
+def replace_emoji(string):
+    emoji_dict = {
+        ":skull:": "<image:emoji/1F480.png>",
+        ":rofl:": "<image:emoji/1F923.png>",
+        ":grin:": "<image:emoji/1F601.png",
+        ":grinning:": "<image:emoji/1F600.png>",
+        ":smiley:": "<image:emoji/1F603.png",
+        ":joy:": "<image:emoji/1F602.png>"}
+
+    for emoji, replacement in emoji_dict.items():
+        string = string.replace(emoji, replacement)
+
+    return string
 class InputState:
     def __init__(self, input_state=None):
         if input_state is not None:
@@ -715,9 +729,11 @@ def on_chat_submit():
     if len(chat_input_field.text) == 0:
         return
 
+
     if profanity.contains_profanity(chat_input_field.text):
         chat_input_field.text = random.choice(['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!'])
 
+    chat_input_field.text = replace_emoji(chat_input_field.text)
     if not peer.is_running():
         return
 
@@ -801,6 +817,8 @@ def tick(dt):
                     bear.state.input_state.right = False
                 bear.tick(dt)
 
+test=Button(text='hi',scale=.1,x=.2,enabled=False)
+test.on_click = peer.stop
 def update():
     global update_timer, tick_timer
 
