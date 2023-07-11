@@ -24,7 +24,11 @@ if SettingsFile:
 def replace_emoji(string):
     emoji_dict = {
         ":skull:": "<image:emoji/1F480.png>",
-        ":rofl:": "<image:emoji/1F923.png>",}
+        ":rofl:": "<image:emoji/1F923.png>",
+        ":grin:": "<image:emoji/1F601.png",
+        ":grinning:": "<image:emoji/1F600.png>",
+        ":smiley:": "<image:emoji/1F603.png",
+        ":joy:": "<image:emoji/1F602.png>"}
 
     for emoji, replacement in emoji_dict.items():
         string = string.replace(emoji, replacement)
@@ -812,6 +816,8 @@ def tick(dt):
                     bear.state.input_state.right = False
                 bear.tick(dt)
 
+test=Button(text='hi',scale=.1,x=.2,enabled=False)
+test.on_click = peer.stop
 def update():
     global update_timer, tick_timer
 
