@@ -17,11 +17,28 @@ except:
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
+if not os.path.exists(f"{main_directory}\\Settings.json"):
+    with open(f"{main_directory}\\Settings.json", 'w') as file:
+        file.write("""{
+    "Server1IP": "178.79.171.190",
+    "Server1Port": "8080",
+    "Server2IP": "Nothing",
+    "Server2Port": "Nothing",
+    "Server3IP": "Nothing",
+    "Server3Port": "Nothing",
+    "Server4IP": "Nothing",
+    "Server4Port": "Nothing",
+    "Server5IP": "Nothing",
+    "Server5Port": "Nothing",
+    "Server6IP": "Nothing",
+    "Server6Port": "Nothing"
+}""")
+else:
+    pass
 SettingsFile = str(main_directory / 'Settings.json')
 SettingsFile = glob.glob(SettingsFile)
 if SettingsFile:
     controlsPath = SettingsFile[0]
-
 class CheckBox(Button):
     def __init__(self, start_state=False, **kwargs):
         super().__init__(start_state=start_state, state=start_state, scale=Text.size, model=Quad(radius=.25))
