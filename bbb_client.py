@@ -1,3 +1,6 @@
+from pathlib import Path
+import glob
+main_directory = Path(__file__).resolve().parent
 try:
     from ursina import *
     from networking import *
@@ -6,16 +9,13 @@ try:
     import os
     from profanity import profanity
     import json
-    from pathlib import Path
-    import glob
+    
 except:
     import subprocess
-    command = 'pip install -r requirements.txt'
+    command = f'pip install -r {main_directory}\\requirements.txt'
     subprocess.call(command, shell=True)
     python = sys.executable
     os.execl(python, python, *sys.argv)
-
-main_directory = Path(__file__).resolve().parent
 
 SettingsFile = str(main_directory / 'Settings.json')
 SettingsFile = glob.glob(SettingsFile)
