@@ -26,7 +26,7 @@ def replace_emoji(string):
     emoji_dict = {
         ":skull:": "<image:emoji/1F480.png>",
         ":rofl:": "<image:emoji/1F923.png>",
-        ":grin:": "<image:emoji/1F601.png">,
+        ":grin:": "<image:emoji/1F601.png>",
         ":grinning:": "<image:emoji/1F600.png>",
         ":smiley:": "<image:emoji/1F603.png>",
         ":joy:": "<image:emoji/1F602.png>"}
