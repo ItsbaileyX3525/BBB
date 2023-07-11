@@ -7,9 +7,8 @@ try:
     from collections import deque
     import requests
     import os
-    from profanity import profanity
+    import censor
     import json
-    
 except:
     import subprocess
     command = f'pip install -r {main_directory}\\requirements.txt'
@@ -38,6 +37,8 @@ SettingsFile = str(main_directory / 'Settings.json')
 SettingsFile = glob.glob(SettingsFile)
 if SettingsFile:
     controlsPath = SettingsFile[0]
+
+
 class CheckBox(Button):
     def __init__(self, start_state=False, **kwargs):
         super().__init__(start_state=start_state, state=start_state, scale=Text.size, model=Quad(radius=.25))
@@ -57,7 +58,6 @@ class CheckBox(Button):
     @state.setter
     def state(self, value):
         self._state = value
-        #print(value)
         self.text = ' x'[int(value)]
 
 def replace_emoji(string):
@@ -481,8 +481,7 @@ class Bear(Entity):
 
     def set_speech(self, msg, duration):
         if ProfanityFilter.state:
-            if profanity.contains_profanity(msg):
-                msg = random.choice(['I swore', 'Look ma, I swore', 'I feel like a big boy', 'sus amogus', 'I am a big boy now!'])
+            msg=censor.censor(msg)
         self.talking = True
         self.talk_time = duration
         self.talk_timer = 0.0
@@ -547,7 +546,7 @@ peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 welcomeMenu=Welcome()
 
 ProfanityFilterText=Text(text='Profanity Filter:',position=(-.85,.465))
-ProfanityFilter=CheckBox(start_value=False, position=(-.65,.45))
+ProfanityFilter=CheckBox(start_state=True, position=(-.65,.45))
 
 @rpc(peer)
 def on_connect(connection, time_connected):
@@ -875,13 +874,13 @@ def update():
     if peer.is_hosting():
         status_text.text = "Hosting.\nWASD to move."
         status_text.y = -0.45
-        if profanity.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
+        if censor.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
             name_input_field.text = 'No name'
         on_name_submit(name_input_field.text)
     else:
         status_text.text = "Connected to host.\nWASD to move."
         status_text.y = -0.45
-        if profanity.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
+        if censor.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
             name_input_field.text = 'No name'
         on_name_submit(name_input_field.text)
 
@@ -918,5 +917,4 @@ input_handler.rebind('up arrow', 'w')
 input_handler.rebind('left arrow', 'a')
 input_handler.rebind('down arrow', 's')
 input_handler.rebind('right arrow', 'd')
-
 app.run() 
