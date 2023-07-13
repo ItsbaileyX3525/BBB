@@ -448,6 +448,8 @@ class Bear(Entity):
         
         self.bearnames = Text(visible=True,x=0, y=self.y-0.05,origin=(0,0))
 
+        self.childrens = [self.bearnames,self.speech_text]
+
     def update(self):
         if self.lerping:
             self.lerp_timer += time.dt
@@ -592,8 +594,9 @@ def on_disconnect(connection, time_disconnected):
     if peer.is_hosting():
         b = connection_to_bear.get(connection)
         if b is not None:
+            for e in b.childrens:
+                destroy(e)
             destroy(b)
-            destroy(b.bearnames)
             bears.remove(b)
             del uuid_to_bear[b.state.uuid]
             del connection_to_bear[connection]
@@ -607,7 +610,7 @@ def on_disconnect(connection, time_disconnected):
             del uuid_to_bear[bear.state.uuid]
         bears.clear()
         my_bear_uuid = None
-        destroy(bear.bearnames)
+
 
 @rpc(peer)
 def set_bear_uuid(connection, time_received, uuid: int):
@@ -809,13 +812,16 @@ def on_name_submit(passedName):
     if len(passedName) == 0:
         return "Nameless"
 
-    with open(controlsPath, 'r') as files:
-        data = json.load(files)
+    try:
+        with open(controlsPath, 'r') as files:
+            data = json.load(files)
 
-    data['Name'] = passedName
+        data['Name'] = passedName
 
-    with open(controlsPath, "w") as files:
-        json.dump(data, files, indent=4)
+        with open(controlsPath, "w") as files:
+            json.dump(data, files, indent=4)
+    except:
+        pass
 
     if not peer.is_running():
         return
