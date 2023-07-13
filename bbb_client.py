@@ -16,10 +16,27 @@ except:
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
+if not os.path.exists(f"{main_directory}\\Settings.json"):
+    with open(f"{main_directory}\\Settings.json", 'w') as file:
+        file.write("""{
+    "Server1IP": "bbbclient.ddns.net",
+    "Server1Port": "8080",
+    "Server2IP": "Nothing",
+    "Server2Port": "Nothing",
+    "Server3IP": "Nothing",
+    "Server3Port": "Nothing",
+    "Server4IP": "Nothing",
+    "Server4Port": "Nothing",
+    "Server5IP": "Nothing",
+    "Server5Port": "Nothing",
+    "Server6IP": "Nothing",
+    "Server6Port": "Nothing"}""")
+else:
+    pass
+
 def download_file(file):
     urlPath = f"https://raw.githubusercontent.com/ItsbaileyX3525/BBB/master/{file}"
     save_path = main_directory
-    print(save_path)
     fileData = requests.get(urlPath)
     if os.path.exists(f"{save_path}\\{file}"):
         with open(f"{save_path}\\{file}", "r") as f:
@@ -32,14 +49,10 @@ def download_file(file):
     else:
         with open(f"{save_path}\\{file}", 'w') as out_file:
             out_file.write(fileData.text)
-    sys.exit()
 
 download_file('wordlist.txt')
 download_file('censor.py')
-download_file('bin.png')
 download_file('networking.py')
-download_file('unicode_bear.png')
-download_file('BBB_client.gif')
 download_file('requirements.txt')
 
 SettingsFile = str(main_directory / 'Settings.json')
