@@ -9,6 +9,7 @@ try:
     import os
     import censor
     import json
+    from panda3d.core import WindowProperties
 except:
     import subprocess
     command = f'pip install -r {main_directory}\\requirements.txt'
@@ -60,7 +61,22 @@ SettingsFile = glob.glob(SettingsFile)
 if SettingsFile:
     controlsPath = SettingsFile[0]
 
+def check_window_focus(task):
+    win_props = app.win.get_properties()
 
+    if win_props.get_foreground() is False:
+        input_state.up = 0
+        input_state.down = 0
+        input_state.right = 0
+        input_state.left = 0
+        chat_input_field.active=False
+        name_input_field.active=False
+        held_keys['w'] = 0
+        held_keys['a'] = 0
+        held_keys['s'] = 0
+        held_keys['d'] = 0
+
+    return task.cont
 class CheckBox(Button):
     def __init__(self, start_state=False, **kwargs):
         super().__init__(start_state=start_state, state=start_state, scale=Text.size, model=Quad(radius=.25))
@@ -170,7 +186,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.9.0"
+        self.version = "1.10.0"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -518,7 +534,7 @@ class Bear(Entity):
 
 
 app = Ursina(borderless=False)
-
+app.taskMgr.add(check_window_focus, "check_window_focus")
 uuid_counter = 0
 
 start_text = "Host or join a room."
@@ -850,6 +866,11 @@ def tick(dt):
         input_state.down = bool(held_keys["s"])
         input_state.right = bool(held_keys["d"])
         input_state.left = bool(held_keys["a"])
+    else:
+        input_state.up = 0
+        input_state.down = 0
+        input_state.right = 0
+        input_state.left = 0
     if my_bear_uuid is not None:
         my_bear = uuid_to_bear.get(my_bear_uuid)
         if my_bear is not None:
