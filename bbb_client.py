@@ -305,6 +305,7 @@ class ServerButton(Button):
        
 
         peer.start(host_name=self.A, port=self.B, is_host=False)
+        on_name_submit(name_input_field.text)
         destroy(self)
 
     def update(self):
@@ -569,8 +570,8 @@ peer.register_type(BearState, serialize_bear_state, deserialize_bear_state)
 
 welcomeMenu=Welcome()
 
-ProfanityFilterText=Text(text='Profanity Filter:',position=(-.85,.465))
-ProfanityFilter=CheckBox(start_state=True, position=(-.65,.45))
+ProfanityFilterText=Text(text='Profanity Filter:',position=(-.85,.48))
+ProfanityFilter=CheckBox(start_state=True, position=(-.65,.471))
 
 @rpc(peer)
 def on_connect(connection, time_connected):
@@ -756,6 +757,7 @@ def host():
         h = "localhost"
 
     peer.start(h, port, is_host=True)
+    on_name_submit(name_input_field.text)
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
@@ -778,6 +780,7 @@ def join():
         h = "localhost"
 
     peer.start(h, port, is_host=False)
+    on_name_submit(name_input_field.text)
     host_input_field.enabled = False
     host_button.enabled = False
     join_button.enabled = False
@@ -822,10 +825,7 @@ def on_name_submit(passedName):
             json.dump(data, files, indent=4)
     except:
         pass
-
-    if not peer.is_running():
-        return
-
+    
     if my_bear_uuid is not None:
         for conn in peer.get_connections():
             peer.namesettar(conn, my_bear_uuid, passedName)
@@ -835,6 +835,8 @@ def on_name_submit(passedName):
             bear = uuid_to_bear.get(my_bear_uuid)
             if bear is not None:
                 bear.set_name(passedName)
+                
+    name_input_field.active = False
     
 
 def tick(dt):
@@ -843,7 +845,7 @@ def tick(dt):
     if time_factor < 1.0:
         pass
 
-    if not chat_input_field.active:
+    if not chat_input_field.active and not name_input_field.active:
         input_state.up = bool(held_keys["w"])
         input_state.down = bool(held_keys["s"])
         input_state.right = bool(held_keys["d"])
@@ -899,18 +901,19 @@ def update():
     join_button.disabled = True
     join_button.enabled = False
     chat_input_field.enabled = True
+    name_input_field.enabled = True
+    ProfanityFilter.enabled = True
+    ProfanityFilterText.enabled = True
     if peer.is_hosting():
         status_text.text = "Hosting.\nWASD to move."
         status_text.y = -0.45
         if censor.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
             name_input_field.text = 'No name'
-        on_name_submit(name_input_field.text)
     else:
         status_text.text = "Connected to host.\nWASD to move."
         status_text.y = -0.45
         if censor.contains_profanity(name_input_field.text) or name_input_field.text == 'Enter name...':
             name_input_field.text = 'No name'
-        on_name_submit(name_input_field.text)
 
     tick_timer += time.dt * time_factor
     while tick_timer >= tick_rate:
@@ -933,13 +936,16 @@ def input(key):
     if not peer.is_running():
         return
     if key == "enter up":
-        if not chat_input_field.active:
-            chat_input_field.active = True
-        else:
+        if chat_input_field.active:
             on_chat_submit()
-    elif key == "escape up" and chat_input_field.active:
-        chat_input_field.text = ""
-        chat_input_field.active = False
+        if name_input_field.active:
+            on_name_submit(name_input_field.text)
+    elif key == "escape up":
+        if chat_input_field.active:
+            chat_input_field.text = ""
+            chat_input_field.active = False
+        elif name_input_field.active:
+            name_input_field.active = False
 
 input_handler.rebind('up arrow', 'w')
 input_handler.rebind('left arrow', 'a')
