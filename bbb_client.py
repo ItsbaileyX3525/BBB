@@ -186,7 +186,7 @@ class Welcome():
         self.parent=camera.ui
         self.model='quad'
         self.color=color.white
-        self.version = "1.10.0"
+        self.version = "1.10.1"
         self.versionGet = requests.get("https://raw.githubusercontent.com/ItsbaileyX3525/BBB/main/version.txt")
         if self.versionGet.status_code != 200:
             print("Failed to retrieve file. Status code:", self.versionGet.status_code)
@@ -866,11 +866,12 @@ def tick(dt):
         input_state.down = bool(held_keys["s"])
         input_state.right = bool(held_keys["d"])
         input_state.left = bool(held_keys["a"])
+        print(input_state.right)
     else:
-        input_state.up = 0
-        input_state.down = 0
-        input_state.right = 0
-        input_state.left = 0
+        input_state.up = False
+        input_state.down = False
+        input_state.right = False
+        input_state.left = False
     if my_bear_uuid is not None:
         my_bear = uuid_to_bear.get(my_bear_uuid)
         if my_bear is not None:
