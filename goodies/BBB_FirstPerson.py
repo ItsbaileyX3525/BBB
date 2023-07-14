@@ -30,11 +30,20 @@ def update():
     global update_rate,update_timer
     peer.update(max_events=100)
 
-    if peer.is_running():
-        if not peer.is_hosting():
-            status_text.text = "Client"
-        elif peer.is_hosting():
-            status_text.text = "Host"
+    if not peer.is_running():
+        status_text.text = start_text
+        mainPlayer.x = 0.0
+        mainPlayer.y = 0.0
+        mainPlayer.z = -0.3
+        otherPlayer.x = 0.0
+        otherPlayer.y = 0.0
+        otherPlayer = 0.3
+        return
+
+    if not peer.is_hosting():
+        status_text.text = "Client"
+    elif peer.is_hosting():
+        status_text.text = "Host"
 
     update_timer += time.dt
     if peer.is_running() and peer.connection_count() > 0:
@@ -49,7 +58,8 @@ def input(key):
         peer.start("localhost", 8080, is_host=True)
     elif key == "c":
         otherPlayer.x = -0.1
-        
         peer.start("localhost", 8080, is_host=False)
+        mainPlayer.color=color.blue
+        otherPlayer.color=color.red
 
 app.run()
