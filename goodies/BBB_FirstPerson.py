@@ -13,7 +13,6 @@ peer = RPCPeer()
 update_rate = 1.0 / 20.0
 update_timer = 0.0
 
-
 @rpc(peer)
 def set_position(connection, time_received, position: Vec3):
     otherPlayer.x = position.x
@@ -44,7 +43,6 @@ def update():
         status_text.text = "Client"
     elif peer.is_hosting():
         status_text.text = "Host"
-
     update_timer += time.dt
     if peer.is_running() and peer.connection_count() > 0:
         peer.set_position(peer.get_connections()[0], Vec3(mainPlayer.x, mainPlayer.y,mainPlayer.z))
@@ -53,12 +51,16 @@ def update():
 def input(key):
     global mainPlayer,otherPlayer
     if key == "h":
-        mainPlayer.x = -0.3
+        mainPlayer.x = 0.0
+        mainPlayer.y = 0.0
+        mainPlayer.z = -0.3
         
         peer.start("localhost", 8080, is_host=True)
     elif key == "c":
-        otherPlayer.x = -0.1
-        peer.start("localhost", 25565, is_host=False)
+        otherPlayer.x = 0.0
+        otherPlayer.y = 0.0
+        otherPlayer.z = 0.3
+        peer.start("localhost", 8080, is_host=False)
         mainPlayer.color=color.blue
         otherPlayer.color=color.red
 
