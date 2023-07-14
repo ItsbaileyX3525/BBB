@@ -37,7 +37,7 @@ def update():
         mainPlayer.z = -0.3
         otherPlayer.x = 0.0
         otherPlayer.y = 0.0
-        otherPlayer = 0.3
+        otherPlayer.z = 0.3
         return
 
     if not peer.is_hosting():
@@ -58,7 +58,7 @@ def input(key):
         peer.start("localhost", 8080, is_host=True)
     elif key == "c":
         otherPlayer.x = -0.1
-        peer.start("localhost", 8080, is_host=False)
+        peer.start("localhost", 25565, is_host=False)
         mainPlayer.color=color.blue
         otherPlayer.color=color.red
 
