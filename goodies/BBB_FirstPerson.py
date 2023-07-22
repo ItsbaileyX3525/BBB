@@ -9,6 +9,7 @@ status_text = Text(text=start_text, origin=(0, 0), z=1)
 class otherPlayerModel(Entity):
     def __init__(self):
         super().__init__(self)
+        self.hp=100
         self.model='cube'
         self.scale_y=2
         self.color=color.blue
@@ -17,6 +18,7 @@ class otherPlayerModel(Entity):
 
 ground = Entity(model='plane',scale_x=100,scale_z=100,texture='grass',collider='box')
 mainPlayer = FirstPersonController(model='cube',color=color.red)
+mainPlayer.hp=100
 otherPlayer = otherPlayerModel()
 peer = RPCPeer()
 update_rate = 1.0 / 20.0
@@ -30,6 +32,12 @@ def set_position(connection, time_received, position: Vec3, rotation: Vec3):
     otherPlayer.rotation_x = rotation.x
     otherPlayer.rotation_y = rotation.y
     otherPlayer.rotation_z = rotation.z
+    
+@rpc(peer)
+def set_healthPoints(connection, time_received, health: int):
+    print(health)
+    otherPlayer.hp = health
+    print(otherPlayer.hp)
     
 def update():
     global update_rate,update_timer
@@ -68,5 +76,14 @@ def input(key):
         peer.start("localhost", 8080, is_host=False)
         mainPlayer.color=color.blue
         otherPlayer.color=color.red
+        
+    if key=='e' and otherPlayer.hp <=0:
+        print("Other player dead")
+    elif key=='e' and otherPlayer.hp >= 0:
+        if peer.is_running() and peer.connection_count() > 0:
+            #print(mainPlayer.hp - 10)
+            mainPlayer.hp -= 10
+            peer.set_healthPoints(peer.get_connections()[0], int(mainPlayer.hp))
+            #print(otherPlayer.hp)
 
 app.run()

@@ -866,7 +866,6 @@ def tick(dt):
         input_state.down = bool(held_keys["s"])
         input_state.right = bool(held_keys["d"])
         input_state.left = bool(held_keys["a"])
-        print(input_state.right)
     else:
         input_state.up = False
         input_state.down = False
@@ -955,6 +954,10 @@ def update():
         update_timer = 0.0
 
 def input(key):
+    if key == "f5":
+        peer.stop()
+    if key == "f9":
+        peer.stop()
     if not peer.is_running():
         return
     if key == "enter up":
